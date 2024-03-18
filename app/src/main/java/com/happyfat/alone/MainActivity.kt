@@ -13,6 +13,12 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 
+import androidx.compose.runtime.Composable
+import androidx.activity.compose.setContent
+import androidx.compose.material3.Text
+import androidx.compose.ui.tooling.preview.Preview
+import com.happyfat.alone.theme.TestTheme
+
 class MainActivity : AppCompatActivity() {
 
     lateinit var selfContext: Context
@@ -20,6 +26,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+//        setContent {
+////            TestTheme {
+////                Greeting("Android Kevin")
+////            }
+//            Greeting("Android Tonny12345")
+//        }
+
         selfContext = this
         val hiBtn : Button = findViewById(R.id.hi_btn)
         val canvasBtn : Button = findViewById(R.id.canvas_btn)
@@ -29,9 +42,11 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(selfContext, "hi", Toast.LENGTH_SHORT).show()
         }
         canvasBtn.setOnClickListener {
-            setContentView(GameView(this))
+//            setContentView(GameView(this))
+            setContentView(SelfFrameLayout(this))
 //            testDrawLine()
         }
+
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -65,4 +80,22 @@ class MainActivity : AppCompatActivity() {
         canvas.drawLine( 5.0f, 5.0f, 100.0f, 100.0f, paint )
         imageView.setImageBitmap(bmp)
     }
+}
+
+
+@Composable
+fun Greeting(name: String) {
+    Text(text = "hello $name!")
+}
+
+//新增
+//新增
+@Preview(showBackground = true)
+@Composable
+//定義預覽可組合函式
+fun DefaultPreview() {
+//    TestTheme {
+//        Greeting("Android Kevin")
+//    }
+    Greeting("Android Kevin -991")
 }
