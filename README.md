@@ -3,6 +3,7 @@
 > https://play.google.com/store/apps/details?id=com.happyfat.alone
 > Kotlin 原生 
 > compose 
+> 上架測試 
 
 
 ## SelfFrameLayout
