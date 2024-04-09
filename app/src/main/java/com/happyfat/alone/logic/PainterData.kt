@@ -30,5 +30,7 @@ class PainterData {
 
     var brushSize: Float = defaultSize
     var brushColor: Color = Color(0xffff0000)
+    var strColor: String = "RED"
+
   }
 }

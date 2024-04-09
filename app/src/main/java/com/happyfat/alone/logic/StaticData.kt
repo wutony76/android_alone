@@ -12,8 +12,17 @@ class StaticData {
   companion object {
     val logTag = "ttt"
     var isDraw: Boolean = false
+    lateinit var uiData: Any
+
     override fun toString(): String {
       return "TEST Static class data." + isDraw
+    }
+  }
+
+  class UIDrawModel {
+    companion object {
+      lateinit var brushSize: Any
+      lateinit var brushColor: Any
     }
   }
 }

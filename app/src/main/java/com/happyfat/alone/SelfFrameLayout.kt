@@ -1,7 +1,6 @@
 package com.happyfat.alone
 
-import android.content.Context
-import android.inputmethodservice.Keyboard.Row
+import android.annotation.SuppressLint
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.FrameLayout
@@ -11,13 +10,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,8 +24,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -100,15 +96,15 @@ class SelfFrameLayout @JvmOverloads constructor(
     // add self painter UI
     this.addView( ComposeView(activityContext).apply {
       setContent {
+
+//        testUi()
+//        /*
         Column (
           modifier = Modifier
             .fillMaxSize()
-
         ){
           // Header
           painterHeadBar ()
-
-
           // Content
           Column (
             modifier = Modifier
@@ -117,14 +113,39 @@ class SelfFrameLayout @JvmOverloads constructor(
           ) {
             Text(text = "canvas", modifier = Modifier.fillMaxWidth())
           }
-
           // Footer
           footerBar()
         }
+//         */
+
       }
     })
+  }
+  @SuppressLint("UnrememberedMutableState")
+  @Composable
+  fun testUi () {
+    var data: String = PainterData.brushSize.toString()
+    val state = remember {mutableStateOf(data)}
 
+    StaticData.uiData = remember {mutableStateOf(data)}
+    Log.e("ttt","state1:${state.value} - ${state.javaClass.kotlin}")//Logcat
+    Log.e("ttt","state2:${state.value} - ${StaticData.uiData.javaClass.kotlin}")//Logcat
 
+    Column {
+      Text(
+        text = (StaticData.uiData as MutableState<String>).value,
+        color = Color.Red,
+        modifier = Modifier.fillMaxWidth()
+      )
+      Button(
+        onClick = {
+          PainterData.brushSize ++
+          (StaticData.uiData as MutableState<String>).value = PainterData.brushSize.toString()
+        }
+      ) {
+        Text(text = "ADD")
+      }
+    }
   }
 
   fun colorItemData (name: String, color: Long): MutableMap<String, Any> {
@@ -160,8 +181,8 @@ class SelfFrameLayout @JvmOverloads constructor(
     val maxBrush = PainterData.maxSize
     val minBrush = PainterData.minSize
     val selfBrush = PainterData.brushSize.toInt()
-    var brushSize by remember { mutableStateOf( TextFieldValue(selfBrush.toString())) }
-    val keyboardController = LocalSoftwareKeyboardController.current
+    var brushSize by remember{ mutableStateOf( TextFieldValue(selfBrush.toString())) }
+    val keyboardController = LocalSoftwareKeyboardController.current // 鍵盤
 
     Column (
       modifier = Modifier
@@ -206,7 +227,6 @@ class SelfFrameLayout @JvmOverloads constructor(
           ),
           onValueChange = {
             brushSize = it
-            Log.e("ttt", "input = " +  it.text )
             if (it.text.all { it.isDigit() }){
               brushSize = it
             } else brushSize = TextFieldValue(minBrush.toInt().toString())
@@ -214,11 +234,13 @@ class SelfFrameLayout @JvmOverloads constructor(
           keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
           keyboardActions = KeyboardActions(
             onDone = {
-              Log.e("ttt", "Keyboard.DONE" + brushSize.toString() + " , " + brushSize.text.length )
+//              Log.e("ttt", "Keyboard.DONE" + brushSize.toString() + " , " + brushSize.text.length )
               if (brushSize.text.length === 0) brushSize = TextFieldValue(minBrush.toInt().toString())
               else if (brushSize.text.toFloat() > maxBrush ) brushSize = TextFieldValue(maxBrush.toInt().toString())
               PainterData.brushSize = brushSize.text.toFloat()
-              Log.e("ttt", "Keyboard.DONE2" )
+              (StaticData.UIDrawModel.brushSize as MutableState<String>).value = PainterData.brushSize.toString() // 更新UI
+
+//              Log.e("ttt", "Keyboard.DONE2" )
               keyboardController?.hide()
             },
             onNext = { Log.e("ttt", "Keyboard.onNext") }
@@ -281,26 +303,20 @@ class SelfFrameLayout @JvmOverloads constructor(
           .height(rowHeight)
           .border(1.dp, Color.Black)
       ) {
-        Log.e("ttt", PainterData.brushSize.toString())
         val textStyle = TextStyle(
           fontSize = 15.sp,
           textAlign = TextAlign.Center
         )
-//        var varBrushSize by remember { painter.brushSize }
-//        var varBrushSize by remember { mutableStateOf( painter.brushSize ) }
-        var varBrushColor by remember { mutableStateOf( PainterData.brushColor ) }
+        StaticData.UIDrawModel.brushSize = remember {mutableStateOf(PainterData.brushSize.toString())}
+        StaticData.UIDrawModel.brushColor = remember {mutableStateOf(PainterData.strColor)}
 
-//        Log.e("ttt", "varBrushSize =" + varBrushSize.toString())
-//        Log.e("ttt", "varBrushColor =" + varBrushColor.toString())
-
-          Text (text="SIZE:${PainterData.brushSize}", style = textStyle,  modifier= Modifier
-            .weight(1.0F)
-            .border(1.dp, Color.Blue))
-          Text (text="COLOR:${varBrushColor}", style = textStyle,  modifier=Modifier.weight(3.0F))
+        Text (text = "SIZE:${(StaticData.UIDrawModel.brushSize as MutableState<String>).value}", style = textStyle,  modifier= Modifier
+          .weight(1.0F)
+          .border(1.dp, Color.Blue))
+        Text (text = "COLOR:${(StaticData.UIDrawModel.brushColor as MutableState<String>).value}", style = textStyle,  modifier=Modifier.weight(3.0F))
       }
 
     }
-
   }
 
   @Composable
@@ -360,66 +376,70 @@ class SelfFrameLayout @JvmOverloads constructor(
   @Composable
   fun colorItem (
     btnName: String = "Default",
-    color: Color = Color.Gray ){
-      Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+    color: Color = Color.Gray
+  ){
+//    var isDataUpdate by remember{ mutableStateOf(false) }
+    Column (
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier
 //            .height(30.dp)
 //            .width(50.dp)
-          .padding(1.dp)
-      ) {
-          Button(
-            onClick = {
-              Log.e("ttt", "onclick1 >" + color.toString())
-              PainterData.brushColor = color
-//              Log.e("ttt", "onclick2 >" + painter.toString())
-            },
-            shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(color),
-            modifier = Modifier
-              .height(30.dp)
-              .width(30.dp)
-          ) {}
+        .padding(1.dp)
+    ) {
+        Button(
+          onClick = {
+//              Log.e("ttt", "onclick1 >" + color.toString())
+//            isDataUpdate = !isDataUpdate
+            PainterData.strColor = btnName
+            PainterData.brushColor = color
+            (StaticData.UIDrawModel.brushColor as MutableState<String>).value = PainterData.strColor // 更新ＵＩ
+          },
+          shape = RoundedCornerShape(50),
+          colors = ButtonDefaults.buttonColors(color),
+          modifier = Modifier
+            .height(30.dp)
+            .width(30.dp)
+        ) {}
 
-          val textBody = TextStyle(
-            color = color,
-            fontWeight = FontWeight.Bold,
-            fontSize = 10.sp,
-            textAlign = TextAlign.Center
-          )
+        val textBody = TextStyle(
+          color = color,
+          fontWeight = FontWeight.Bold,
+          fontSize = 10.sp,
+          textAlign = TextAlign.Center
+        )
 
-          var textStyle by remember { mutableStateOf(textBody) }
-          var readyToDraw by remember { mutableStateOf(false) }
+        var textStyle by remember { mutableStateOf(textBody) }
+        var readyToDraw by remember { mutableStateOf(false) }
 
-          Text(
-            text = btnName,
-            style = textStyle,
+        Text(
+          text = btnName,
+          style = textStyle,
 //            modifier = Modifier
 //                .width(30.dp)
 //                .border(1.dp, Color.Red)
 //            ,
-            modifier = Modifier
-              .width(30.dp)
-              .height(15.dp)
-              .drawWithContent {
-                if (readyToDraw) drawContent()
-              }
-//              .border(1.dp, Color.Red)
-            ,
-
-            onTextLayout = { res ->
-//                Log.e("ttt", res.toString() )
-                Log.e("ttt", res.didOverflowWidth.toString() +" , "+ textStyle.fontSize.toString() )
-//                Log.e("ttt", res. )
-                if (res.didOverflowWidth) {
-                    textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.9)
-                } else {
-                    readyToDraw = true
-                }
+          modifier = Modifier
+            .width(30.dp)
+            .height(15.dp)
+            .drawWithContent {
+              if (readyToDraw) drawContent()
             }
-          )
-      }
+//              .border(1.dp, Color.Red)
+          ,
+
+          onTextLayout = { res ->
+//                Log.e("ttt", res.toString() )
+              Log.e("ttt", res.didOverflowWidth.toString() +" , "+ textStyle.fontSize.toString() )
+//                Log.e("ttt", res. )
+              if (res.didOverflowWidth) {
+                  textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.9)
+              } else {
+                  readyToDraw = true
+              }
+          }
+        )
     }
+  }
 }
 
 
