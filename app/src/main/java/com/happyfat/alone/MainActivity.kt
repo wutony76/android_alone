@@ -2,6 +2,7 @@ package com.happyfat.alone
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -21,7 +22,26 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
 import com.happyfat.alone.theme.TestTheme
+import android.Manifest
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.happyfat.alone.logic.StaticData
+import com.happyfat.alone.logic.Tools
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,31 +52,37 @@ class MainActivity : AppCompatActivity() {
     selfContext = this
     setContentView(HelloLayout(this))
 
+
     /*
-//        setContent {
-////            TestTheme {
-////                Greeting("Android Kevin")
-////            }
-//            Greeting("Android Tonny12345")
-//        }
+    // 測試CODE...
 
     setContentView(R.layout.activity_main)
     val hiBtn : Button = findViewById(R.id.hi_btn)
     val canvasBtn : Button = findViewById(R.id.canvas_btn)
     imageView = findViewById(R.id.imageView)
-
     hiBtn.setOnClickListener {
       Toast.makeText(selfContext, "hi", Toast.LENGTH_SHORT).show()
     }
     canvasBtn.setOnClickListener {
 //      setContentView(SelfFrameLayout(this)) // start Draw page
+      Log.e(StaticData.logTag, "***** selfContext = ${selfContext}")
       setContentView(HelloLayout(this)) // start Draw page
-      // 以下測試 UI code.
+
+      // ----- 以下測試 UI code. -----
       // setContentView(GameView(this))
       // testDrawLine()
       // testShowDialog(this)
+
+      // 測試 Compose UI 使用 Code
+//      setContent {
+//        TestTheme {
+//          Greeting("Android Kevin")
+//        }
+//        Greeting("Android Tonny12345")
+//        testComposeDrawableToBitmap()
+//      }
     }
-    */
+     */
   }
 
   override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -120,22 +146,76 @@ class MainActivity : AppCompatActivity() {
     builder.show()
   }
 
-}
+  @Composable
+  fun Greeting(name: String) {
+    Text(text = "hello $name!")
+  }
 
-
-@Composable
-fun Greeting(name: String) {
-  Text(text = "hello $name!")
-}
-
-//新增
-//新增
-@Preview(showBackground = true)
-@Composable
+  //新增
+  @Preview(showBackground = true)
+  @Composable
 //定義預覽可組合函式
-fun DefaultPreview() {
+  fun DefaultPreview() {
 //    TestTheme {
 //        Greeting("Android Kevin")
 //    }
-  Greeting("Android Kevin -991")
+    Greeting("Android Kevin -991")
+  }
+
+  // compose Image test.
+  @Composable
+  fun testComposeDrawableToBitmap () {
+    // val ctx = LocalContext.current
+    val ctx = selfContext
+
+    Column() {
+      Text(
+        modifier = Modifier.padding(6.dp),
+        text = "Normal Image",
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp
+      )
+      Spacer(modifier = Modifier.height(20.dp))
+      Image(
+        painter = painterResource(id = R.drawable.ic_launcher_background),
+        contentDescription = "Android",
+        alignment = Alignment.Center
+      )
+      Spacer(modifier = Modifier.height(20.dp))
+      Spacer(modifier = Modifier.height(20.dp))
+      Text(
+        modifier = Modifier.padding(6.dp),
+        text = "Bitmap Image",
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp
+      )
+      Spacer(modifier = Modifier.height(20.dp))
+      val bitmap = getBitmapFromImage(ctx, R.drawable.ic_launcher_background)
+
+      // on below line we are creating our bitmap image/
+      Image(
+        modifier = Modifier
+          .height(200.dp)
+          .width(200.dp),
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = "Android",
+        alignment = Alignment.Center
+      )
+    }
+
+
+  }
+  private fun getBitmapFromImage(context: Context, drawable: Int): Bitmap {
+    val db = ContextCompat.getDrawable(context, drawable)
+    val bit = Bitmap.createBitmap(
+      db!!.intrinsicWidth, db.intrinsicHeight, Bitmap.Config.ARGB_8888
+    )
+    val canvas = Canvas(bit)
+    db.setBounds(0, 0, canvas.width, canvas.height)
+    db.draw(canvas)
+    return bit
+  }
+
 }
+
+

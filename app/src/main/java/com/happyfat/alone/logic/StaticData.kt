@@ -1,6 +1,8 @@
 package com.happyfat.alone.logic
 
+import android.view.View
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 
 class StaticData {
 //  companion object {
@@ -13,6 +15,7 @@ class StaticData {
     val logTag = "ttt"
     var isDraw: Boolean = false
     lateinit var uiData: Any
+    lateinit var drawView: View
 
     override fun toString(): String {
       return "TEST Static class data." + isDraw
@@ -23,6 +26,7 @@ class StaticData {
     companion object {
       lateinit var brushSize: Any
       lateinit var brushColor: Any
+      lateinit var saveDrawBmp: Any
     }
   }
 }

@@ -28,13 +28,14 @@ class GameView @JvmOverloads constructor(
 //    context: Context,
     activity: MainActivity,
     attrs: AttributeSet ?= null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    canvasWidth: Int? = null,
+    canvasHeight: Int? = null
 ) : View(activity, attrs, defStyleAttr) {
 
     val activityContext: Context = activity.selfContext
-//    private val mContext: Context = context
-    private lateinit var canvas: Canvas
-    private lateinit var bmp: Bitmap
+    private lateinit var selfCanvas: Canvas
+    public lateinit var bmp: Bitmap
     val TAG:String = "ttt"
     lateinit var paint:Paint
 
@@ -57,13 +58,15 @@ class GameView @JvmOverloads constructor(
 //        strokeWidth = 10f // 以像素為單位指定筆劃的寬度。 default: Hairline-width (really thin)
         }
        */
-      val wd = Resources.getSystem().displayMetrics.widthPixels
-      val ht = Resources.getSystem().displayMetrics.heightPixels
+      var wd = canvasWidth !== null ? Resources.getSystem().displayMetrics.widthPixels
+      var ht = Resources.getSystem().displayMetrics.heightPixels
+
+      if ()
 
       bmp = Bitmap.createBitmap(wd, ht, Bitmap.Config.ARGB_8888)
-      canvas = Canvas(bmp)
+      selfCanvas = Canvas(bmp)
 //        canvas.drawColor(Color.BLACK)
-      canvas.drawARGB(100, 100, 100, 100) // 0-255
+      selfCanvas.drawARGB(100, 100, 100, 100) // 0-255
 
       // test draw line.
       // canvas.drawLine(0f, 0f, 100f, 100f, paint)
@@ -106,7 +109,7 @@ class GameView @JvmOverloads constructor(
             Log.e(TAG, "move")
             val stopX = event.x
             val stopY = event.y
-            canvas.drawLine(currentX, currentY, stopX, stopY, paint)
+            selfCanvas.drawLine(currentX, currentY, stopX, stopY, paint)
             currentX = event.x
             currentY = event.y
             invalidate()
@@ -114,6 +117,10 @@ class GameView @JvmOverloads constructor(
       }
       return true
     }
+
+  fun getViewCanvasBitmap(): Bitmap {
+    return bmp
+  }
 }
 
 //@Composable

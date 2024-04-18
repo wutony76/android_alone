@@ -1,9 +1,12 @@
 package com.happyfat.alone
 
 import android.annotation.SuppressLint
+//import android.graphics.Canvas
 import android.util.AttributeSet
 import android.util.Log
+import android.view.View
 import android.widget.FrameLayout
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -42,12 +50,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.happyfat.alone.logic.PainterData
 import com.happyfat.alone.logic.StaticData
+import com.happyfat.alone.logic.Tools
 import org.json.JSONObject
-
 
 class SelfFrameLayout @JvmOverloads constructor(
   mainActivity: MainActivity,
@@ -62,6 +72,8 @@ class SelfFrameLayout @JvmOverloads constructor(
 
 //  val painter = PainterData()
   var activityContext = selfActivity.selfContext  // get activity context.
+
+  public lateinit var uiDrawView: View
 
 
   init {
@@ -91,7 +103,8 @@ class SelfFrameLayout @JvmOverloads constructor(
      */
 
     // Draw UI
-    this.addView(GameView(mainActivity))
+    uiDrawView = GameView(mainActivity)
+    this.addView(uiDrawView)
 
     // add self painter UI
     this.addView( ComposeView(activityContext).apply {
@@ -316,7 +329,63 @@ class SelfFrameLayout @JvmOverloads constructor(
         Text (text = "COLOR:${(StaticData.UIDrawModel.brushColor as MutableState<String>).value}", style = textStyle,  modifier=Modifier.weight(3.0F))
       }
 
+      val ctx = selfActivity.selfContext
+      val bitmap = Tools.getBitmapFromImage(ctx)
+      val imageBitmap = bitmap.asImageBitmap()
+//      StaticData.UIDrawModel.saveDrawBmp = remember { imageBitmap }
+       StaticData.UIDrawModel.saveDrawBmp = remember {mutableStateOf<ImageBitmap?>(imageBitmap)}
+      Log.e(StaticData.logTag, "*** ${StaticData.UIDrawModel.saveDrawBmp}")
+
+      val outImage = remember { drawToBitmap() }
+//
+
+      Row () {
+        Image(
+//        painter = painterResource(id = R.drawable.ic_launcher_background),
+          bitmap = (StaticData.UIDrawModel.saveDrawBmp as MutableState<ImageBitmap>).value,
+          contentDescription = "Save Draw Img"
+        )
+
+        // ----- test draw Image. -----
+//        Canvas (modifier = Modifier.fillMaxWidth()) {
+//          drawImage(outImage)
+//        }
+
+//        Canvas (modifier = Modifier.fillMaxSize()) {
+//          scale(scaleX = 10f, scaleY = 15f) {
+//            drawCircle(Color.Blue, radius = 20.dp.toPx())
+//          }
+//        }
+      }
     }
+  }
+
+  fun CanvasDrawScope.asBitmap(size: Size, onDraw: DrawScope.() -> Unit): ImageBitmap {
+    val bitmap = ImageBitmap(size.width.toInt(), size.height.toInt())
+    draw(Density(1f), LayoutDirection.Ltr, androidx.compose.ui.graphics.Canvas(bitmap), size) { onDraw() }
+    return bitmap
+  }
+  fun drawToBitmap(): ImageBitmap {
+    val drawScope = CanvasDrawScope()
+    val size = Size(400f, 400f)
+//    val bitmap = drawScope.asBitmap(size) {
+//      // Draw whatever you want here; for instance, a white background and a red line.
+//      drawRect(color = Color.White, topLeft = Offset.Zero, size = size)
+//      drawLine(
+//        color = Color.Red,
+//        start = Offset.Zero,
+//        end = Offset(size.width, size.height),
+//        strokeWidth = 5f
+//      )
+//    }
+    val ctx = selfActivity.selfContext
+    var bitmap = Tools.getBitmapFromImage(ctx).asImageBitmap()
+    return bitmap
+  }
+
+  @Composable
+  fun testDrawBmp() {
+
   }
 
   @Composable
@@ -346,8 +415,6 @@ class SelfFrameLayout @JvmOverloads constructor(
       }
 
       Text ( text = "", modifier = Modifier.weight(1.0f) )
-
-
       Button(
         onClick = {
           Log.e("ttt", "CLICK. PLAY")
@@ -361,15 +428,37 @@ class SelfFrameLayout @JvmOverloads constructor(
       Button(
         onClick = {
           Log.e("ttt", "CLICK. SAVE")
+//          val viewBmp = Tools.createViewBmp(StaticData.drawView)
+          val viewBmp = Tools.createViewBmp(StaticData.drawView, (StaticData.drawView as GameView).getViewCanvasBitmap())
+
+          Log.e("ttt", "CLICK. SAVE >>>  GET... ${(StaticData.drawView as GameView).getViewCanvasBitmap()}")
+          PainterData.drawImg = viewBmp // save
+
+          (StaticData.UIDrawModel.saveDrawBmp as MutableState<ImageBitmap>).value = Tools.getBitmapFromImage(selfActivity.selfContext, viewBmp).asImageBitmap()
+
         },
         modifier = Modifier
       ) {
         Text( text = "SAVE")
       }
-
-
     }
 
+//    fun testDrawLine () {
+//      Log.e("ttt", "testDrawLine")
+//      val bmp = Bitmap.createBitmap(700, 700, Bitmap.Config.ARGB_8888)
+//      val canvas = Canvas(bmp)
+//      canvas.drawColor(android.graphics.Color.BLACK)
+//      val paint = Paint()
+//      paint.color = android.graphics.Color.RED
+//      paint.style = Paint.Style.STROKE
+//      paint.strokeWidth = 8F
+//      paint.isAntiAlias = true
+//      val offset = 50
+//      canvas.drawLine(offset.toFloat(), (canvas.height/2).toFloat(), (canvas.width - offset).toFloat(), (canvas.height /
+//          2).toFloat(), paint)
+//      canvas.drawLine( 5.0f, 5.0f, 100.0f, 100.0f, paint )
+////      imageView.setImageBitmap(bmp)
+//    }
   }
 
   // color splice.
@@ -442,12 +531,3 @@ class SelfFrameLayout @JvmOverloads constructor(
   }
 }
 
-
-//private fun Any.get(s: String): Any {
-//
-//}
-
-//private operator fun Any.get(s: String): Any {
-//  Log.e("ttt.gg", s + "  ******")
-//  return ""
-//}

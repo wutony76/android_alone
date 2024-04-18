@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.material3.Text
 import androidx.compose.ui.platform.ComposeView
 import com.happyfat.alone.logic.HelloData
+import com.happyfat.alone.logic.StaticData
 import kotlin.random.Random
 
 class HelloLayout @JvmOverloads constructor(
@@ -29,7 +30,9 @@ class HelloLayout @JvmOverloads constructor(
       Toast.makeText(activityContext, randomMessage, Toast.LENGTH_SHORT).show()
     }
     canvasBtn.setOnClickListener {
-      mainActivity.setContentView(SelfFrameLayout(mainActivity))
+      val drawView = SelfFrameLayout(mainActivity)
+      StaticData.drawView = drawView.uiDrawView // 保存Canvas
+      mainActivity.setContentView(drawView)
     }
     this.addView(xmlView)
   }

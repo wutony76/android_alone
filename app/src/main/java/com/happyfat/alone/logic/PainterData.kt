@@ -1,5 +1,6 @@
 package com.happyfat.alone.logic
 
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
 import org.json.JSONObject
 import java.util.Objects
@@ -31,6 +32,6 @@ class PainterData {
     var brushSize: Float = defaultSize
     var brushColor: Color = Color(0xffff0000)
     var strColor: String = "RED"
-
+    var drawImg: Bitmap? = null
   }
 }
