@@ -29,8 +29,8 @@ class GameView @JvmOverloads constructor(
     activity: MainActivity,
     attrs: AttributeSet ?= null,
     defStyleAttr: Int = 0,
-    canvasWidth: Int? = null,
-    canvasHeight: Int? = null
+//    canvasWidth: Int? = null,
+//    canvasHeight: Int? = null
 ) : View(activity, attrs, defStyleAttr) {
 
     val activityContext: Context = activity.selfContext
@@ -58,10 +58,9 @@ class GameView @JvmOverloads constructor(
 //        strokeWidth = 10f // 以像素為單位指定筆劃的寬度。 default: Hairline-width (really thin)
         }
        */
-      var wd = canvasWidth !== null ? Resources.getSystem().displayMetrics.widthPixels
+//      var wd = canvasWidth !== null ? Resources.getSystem().displayMetrics.widthPixels
+      var wd = Resources.getSystem().displayMetrics.widthPixels
       var ht = Resources.getSystem().displayMetrics.heightPixels
-
-      if ()
 
       bmp = Bitmap.createBitmap(wd, ht, Bitmap.Config.ARGB_8888)
       selfCanvas = Canvas(bmp)
